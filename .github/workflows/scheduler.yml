@@ -1,0 +1,28 @@
+name: Daily AI Video Job
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # Runs at 6:30 AM IST (1 AM UTC) every day
+  workflow_dispatch:       # Allows manual triggering
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run automation script
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          DID_API_KEY: ${{ secrets.DID_API_KEY }}
+        run: python main.py
