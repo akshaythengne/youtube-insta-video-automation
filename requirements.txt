@@ -1,2 +1,13 @@
 # Add your Python dependencies here
 requests
+re
+pickle
+diffusers
+transformers
+accelerate
+scipy
+safetensors
+torch
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
