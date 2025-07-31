@@ -1,28 +1,39 @@
-name: Daily AI Video Job
+name: AI Shorts Automation
 
 on:
   schedule:
-    - cron: "0 1 * * *"   # Runs at 6:30 AM IST (1 AM UTC) every day
-  workflow_dispatch:       # Allows manual triggering
+    - cron: '0 0 * * 0'   # Weekly: Generate batch
+    - cron: '0 9 * * *'   # Daily: Generate and upload video
 
 jobs:
-  build-and-run:
+  generate_batch:
+    if: github.event.schedule == '0 0 * * 0'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-
+          python-version: '3.10'
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Run automation script
+      - name: Generate Weekly Batch
+        run: python generate_batch.py
         env:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-          DID_API_KEY: ${{ secrets.DID_API_KEY }}
+
+  generate_video:
+    if: github.event.schedule == '0 9 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Generate and Upload Video
         run: python main.py
+        env:
+          DID_API_KEY: ${{ secrets.DID_API_KEY }}  # username:password format

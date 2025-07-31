@@ -1,13 +1,21 @@
-# Add your Python dependencies here
-requests
-re
-pickle
+# Image generation (local)
 diffusers
 transformers
 accelerate
 scipy
-safetensors
 torch
+Pillow
+
+# Prompt generation via API
+requests
+
+# Google API for YouTube upload
 google-api-python-client
+google-auth
 google-auth-oauthlib
 google-auth-httplib2
+oauth2client
+
+# For reading environment variables locally (optional)
+python-dotenv
+edge-tts

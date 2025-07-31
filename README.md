@@ -1,27 +1,28 @@
-# youtube-insta-video-automation
-# Automated AI Story Video Generator (Serverless, Free)
+# AI Shorts Generator
 
-This project generates a unique story and AI video daily, using Perplexity and D-ID APIs. It runs serverlessly via GitHub Actions (no infra costs).
+This project generates short AI-powered stories and converts them into narrated videos using Hugging Face, Perplexity, D-ID, and YouTube API.
 
-## ⚙️ Setup
+## Structure
 
-### 1. Get your API keys:
-- Perplexity API: [perplexity.ai](https://www.perplexity.ai/pro)
-- D-ID API: [d-id.com](https://studio.d-id.com/)
+- `generate_batch.py` — Generates a batch of 7 stories and images for the week.
+- `main.py` — Converts one story/image pair into a narrated video and uploads to YouTube.
+- `.github/workflows/schedule.yml` — GitHub Actions for automation.
 
-### 2. Add your keys:
-Go to your repo → Settings → Secrets and variables → Actions → New repository secret  
-Add:
-- `PERPLEXITY_API_KEY`
-- `DID_API_KEY`
+## GitHub Actions Setup
 
-### 3. Commit and push.
-GitHub Actions will run the workflow (and you can trigger it manually in Actions tab).
+- Store the following secrets in your GitHub repository:
+  - `PERPLEXITY_API_KEY`
+  - `HUGGING_API_KEY`
+  - `DID_API_KEY`
 
-### 4. Find results:
-The script generates `output.mp4` on each workflow run (check the "Artifacts" of the workflow job—it can be downloaded from the run summary).
+## Cron Schedules
 
-## ⭐ Extending this:
+- Weekly batch generation: **Sunday 00:00 UTC**
+- Daily video generation: **Every day 09:00 UTC**
 
-- Add code to auto-upload to YouTube Shorts/Instagram.
-- Compose more sophisticated prompts/styles.
+## Local Setup
+
+```bash
+pip install -r requirements.txt
+python generate_batch.py  # Run weekly
+python main.py            # Run daily

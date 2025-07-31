@@ -1,0 +1,32 @@
+[
+  {
+    "story": "Ella had always believed that books held secret worlds, but the library’s hidden door proved it. Late one night, clutching a novel to her chest, she pushed the creaking panel and stepped into a corridor bathed in moonlit dust. Shelves towered above her, and the air whispered with stories longing to be read. Her heart pounded as the glow of adventure pulled her into the unknown.",
+    "image_prompt": "A girl in a flowing white-blue dress holding a book, standing in a dimly lit vintage library, facing a glowing doorway that opens into a mysterious, starry night beyond the shelves.",
+    "image_path": "prompt_images/image_1.png"
+  },
+  {
+    "story": "On a foggy evening, Eli wandered the cobbled streets of the old town. Lanterns flickered, and the faint sound of distant bells mingled with the smell of rain. In the alley ahead, a black-and-white cat sat patiently, as if guarding a secret. As the sun set behind the old buildings, the city seemed frozen in a magical, golden moment.",
+    "image_prompt": "A sunlit cobblestone alley in a historic town, with warm golden light reflecting on stone walls, and a lone black-and-white cat sitting in the foreground near a softly glowing doorway.",
+    "image_path": "prompt_images/image_2.png"
+  },
+  {
+    "story": "At the park bench beneath a golden evening sky, a mother and her young son opened an old storybook together. He traced the illustrations with tiny fingers, listening as she brought the characters to life. The world around them seemed to pause, and the last rays of sunlight kissed their quiet moment of connection.",
+    "image_prompt": "A serene park scene at sunset, with a woman in a light blue dress sitting on a bench, reading to a young boy, surrounded by tall trees and a golden sky.",
+    "image_path": "prompt_images/image_3.png"
+  },
+  {
+    "story": "In the dreamlike town of Evernight, siblings discovered a glowing vault labeled 'Land of Dreams.' As they approached, silver letters spiraled through the air like shooting stars. Holding hands, they felt the night swirl with promise, and the vault door hummed as if it knew their hearts’ desires.",
+    "image_prompt": "A whimsical, anime-style night scene with three children, one holding a younger sibling’s hand, standing before a glowing, round dream vault with swirling silver letters in a starry sky.",
+    "image_path": "prompt_images/image_4.png"
+  },
+  {
+    "story": "Deep in the enchanted forest, the ancient tree pulsed with blue light. Wisps of glowing orbs danced among its roots and branches, guiding lost travelers to safety. As the last light of day faded, the tree’s luminous energy revealed constellations in the leaves, as if the forest itself was alive with wonder.",
+    "image_prompt": "A majestic old tree in a forest at twilight, with glowing blue orbs and light trails illuminating its branches and roots, surrounded by warm golden sunlight and a magical atmosphere.",
+    "image_path": "prompt_images/image_5.png"
+  },
+  {
+    "story": "Late at night, the secret library came alive. Golden lights lined the shelves, revealing a hidden passage that stretched into infinity. A lone figure stepped through, feeling the thrill of discovery as if each book whispered encouragement to venture deeper into the luminous unknown.",
+    "image_prompt": "A warm, glowing library hallway with tall bookshelves illuminated in golden light, and a lone person walking into a bright, mysterious passageway.",
+    "image_path": "prompt_images/image_6.png"
+  }
+]
