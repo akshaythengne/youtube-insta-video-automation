@@ -10,10 +10,41 @@ from google.auth.transport.requests import Request
 import pickle
 from PIL import Image
 import edge_tts  # Microsoft local TTS
+from urllib.parse import quote
+import asyncio
+import base64
 
 BATCH_FILE = os.path.join("prompt_images", "prompt_batch.json")
 DID_API_KEY = os.environ["DID_API_KEY"]  # Format: username:password
 username, password = DID_API_KEY.split(":")
+
+
+def prepare_image_for_did(path):
+    """Convert PNG to JPEG for D-ID uploads (if needed)."""
+    if path.lower().endswith(".png"):
+        img = Image.open(path).convert("RGB")
+        jpeg_path = path.replace(".png", ".jpg")
+        img.save(jpeg_path, "JPEG")
+        return jpeg_path
+    return path
+
+def convert_did_url(s3_url: str, bucket_type: str):
+    """Convert s3:// D-ID URLs to proper HTTPS with encoding."""
+    if bucket_type == 'images':
+        base = "https://d-id-images-prod.s3.amazonaws.com/"
+        prefix = "s3://d-id-images-prod/"
+    else:
+        base = "https://d-id-audios-prod.s3.amazonaws.com/"
+        prefix = "s3://d-id-audios-prod/"
+    
+    clean_path = s3_url.replace(prefix, "")
+    return base + quote(clean_path, safe="/._-")
+
+async def generate_tts_audio(text, output_file="story.mp3", voice="en-US-JennyNeural"):
+    """Generate narration audio using Microsoft Edge TTS."""
+    communicate = edge_tts.Communicate(text, voice=voice)
+    await communicate.save(output_file)
+    return output_file
 
 
 def prepare_image_for_did(path):
@@ -34,85 +65,72 @@ async def generate_tts_audio(text, output_file="story.mp3", voice="en-US-JennyNe
 
 
 def create_video(story_text, avatar_path):
+    """Create talking head video using D-ID with multipart upload (image + audio)."""
+    auth_string = f"{username}:{password}"
+    auth_encoded = base64.b64encode(auth_string.encode()).decode()
     # Step 1: Convert image if needed
-    avatar_path = prepare_image_for_did(avatar_path)
+    # avatar_path = prepare_image_for_did(avatar_path)
 
-    # Step 2: Upload image to D-ID
-    with open(avatar_path, "rb") as img:
-        files = {"image": img}
-        r = requests.post(
-            "https://api.d-id.com/images",
-            files=files,
-            auth=HTTPBasicAuth(username, password)
-        )
+    # # Step 2: Generate local narration audio
+    # audio_file = "story.mp3"
+    # asyncio.run(generate_tts_audio(story_text, audio_file))
 
-    print("D-ID Image Upload Response:", r.status_code, r.text)
-    if r.status_code not in (200, 201):
-        raise Exception(f"D-ID image upload failed: {r.text}")
+    # # Step 3: Call D-ID /talks endpoint with multipart files
+    # files = {
+    #     "image": open(avatar_path, "rb"),
+    #     "audio": open(audio_file, "rb")
+    # }
 
-    resp = r.json()
-    image_url = resp.get("url")
-    if not image_url:
-        raise Exception(f"No image URL returned: {r.text}")
+    # # Only specify minimal script info for audio input
+    # data = {
+    #     "script": json.dumps({
+    #         "type": "audio"
+    #     })
+    # }
 
-    # Convert s3:// to https:// for use in /talks
-    if image_url.startswith("s3://d-id-images-prod/"):
-        image_url = image_url.replace(
-            "s3://d-id-images-prod/",
-            "https://d-id-images-prod.s3.amazonaws.com/"
-        ).replace("|", "%7C")
+    # r = requests.post(
+    #     "https://api.d-id.com/talks",
+    #     files=files,
+    #     data=data,
+    #     auth=HTTPBasicAuth(username, password)
+    # )
 
-    # Step 3: Generate narration locally as MP3
-    import asyncio
-    audio_file = "story.mp3"
-    asyncio.run(generate_tts_audio(story_text, audio_file))
+    url = "https://api.d-id.com/talks"
 
-    # Step 4: Upload audio to a public file hosting service
-    # For simplicity, we upload directly to D-ID (they support multipart audio)
-    with open(audio_file, "rb") as audio:
-        files = {"audio": audio}
-        r = requests.post(
-            "https://api.d-id.com/audios",
-            files=files,
-            auth=HTTPBasicAuth(username, password)
-        )
-
-    print("D-ID Audio Upload Response:", r.status_code, r.text)
-    if r.status_code not in (200, 201):
-        raise Exception(f"D-ID audio upload failed: {r.text}")
-
-    audio_url = r.json().get("url")
-    if audio_url.startswith("s3://d-id-audios-prod/"):
-        audio_url = audio_url.replace(
-            "s3://d-id-audios-prod/",
-            "https://d-id-audios-prod.s3.amazonaws.com/"
-        ).replace("|", "%7C")
-
-    # Step 5: Create talking video using audio
     payload = {
-        "source_url": image_url,
+        "source_url": "https://d-id-public-bucket.s3.us-west-2.amazonaws.com/alice.jpg",
         "script": {
-            "type": "audio",
-            "audio_url": audio_url
-        }
+            "type": "text",
+            "subtitles": "false",
+            "provider": {
+                "type": "microsoft",
+                "voice_id": "en-US-JennyNeural"
+            },
+            "input": story_text,
+            "ssml": "false"
+        },
+        "config": { "fluent": "false" }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": f"Basic {auth_encoded}"
     }
 
-    r = requests.post(
-        "https://api.d-id.com/talks",
-        json=payload,
-        auth=HTTPBasicAuth(username, password)
-    )
+    r = requests.post(url, json=payload, headers=headers)
+
+
     print("D-ID Video Creation Response:", r.status_code, r.text)
-    if r.status_code != 200:
+    if r.status_code not in (200, 201):
         raise Exception(f"D-ID video creation failed: {r.text}")
 
     talk_id = r.json().get("id")
     if not talk_id:
         raise Exception(f"No talk ID returned: {r.text}")
 
-    # Step 6: Poll for video completion
+    # Step 4: Poll for video completion
     result_url = None
-    for _ in range(25):
+    for attempt in range(30):  # up to ~6 minutes
         time.sleep(12)
         check = requests.get(
             f"https://api.d-id.com/talks/{talk_id}",
@@ -122,18 +140,21 @@ def create_video(story_text, avatar_path):
         if "result_url" in result:
             result_url = result["result_url"]
             break
-        print("Waiting for video to be ready...")
+        print(f"[Attempt {attempt+1}/30] Waiting for video to be ready...")
 
     if not result_url:
         raise Exception("Video generation timed out.")
 
-    # Step 7: Download the resulting video
+    # Step 5: Download the resulting video
     with requests.get(result_url, stream=True) as resp:
-        with open('output.mp4', 'wb') as f:
+        with open("output.mp4", "wb") as f:
             for chunk in resp.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
+
     print("Video saved as output.mp4")
+
+
 
 
 def upload_to_youtube(video_file, title, description):

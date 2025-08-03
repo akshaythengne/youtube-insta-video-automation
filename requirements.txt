@@ -19,3 +19,10 @@ oauth2client
 # For reading environment variables locally (optional)
 python-dotenv
 edge-tts
+gTTS         # if using Google TTS
+pydub        # for audio handling
+# For audio processing
+
+# For url encoding in main.py
+urllib3
+# Note: urllib3 is used for URL encoding in main.py, but it is not explicitly
