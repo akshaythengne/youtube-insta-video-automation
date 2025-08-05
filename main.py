@@ -16,8 +16,8 @@ import base64
 
 BATCH_FILE = os.path.join("prompt_images", "prompt_batch.json")
 DID_API_KEY = os.environ["DID_API_KEY"]  # Format: username:password
-username, password = DID_API_KEY.split(":")
-
+#username, password = DID_API_KEY.split(":")
+BASIC_AUTH_HEADER = f"Basic {DID_API_KEY}"
 
 def prepare_image_for_did(path):
     """Convert PNG to JPEG for D-ID uploads (if needed)."""
@@ -66,8 +66,8 @@ async def generate_tts_audio(text, output_file="story.mp3", voice="en-US-JennyNe
 
 def create_video(story_text, avatar_path):
     """Create talking head video using D-ID with multipart upload (image + audio)."""
-    auth_string = f"{username}:{password}"
-    auth_encoded = base64.b64encode(auth_string.encode()).decode()
+    #auth_string = f"{username}:{password}"
+    #auth_encoded = base64.b64encode(auth_string.encode()).decode()
     # Step 1: Convert image if needed
     # avatar_path = prepare_image_for_did(avatar_path)
 
@@ -114,7 +114,7 @@ def create_video(story_text, avatar_path):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "authorization": f"Basic {auth_encoded}"
+        "authorization": BASIC_AUTH_HEADER"
     }
 
     r = requests.post(url, json=payload, headers=headers)
@@ -132,9 +132,13 @@ def create_video(story_text, avatar_path):
     result_url = None
     for attempt in range(30):  # up to ~6 minutes
         time.sleep(12)
+        headers = {
+            "Authorization": BASIC_AUTH_HEADER,
+            "Content-Type": "application/json"
+        }
         check = requests.get(
             f"https://api.d-id.com/talks/{talk_id}",
-            auth=HTTPBasicAuth(username, password)
+            headers=headers
         )
         result = check.json()
         if "result_url" in result:
