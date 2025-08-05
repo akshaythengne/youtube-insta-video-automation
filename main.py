@@ -114,7 +114,7 @@ def create_video(story_text, avatar_path):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "authorization": BASIC_AUTH_HEADER"
+        "authorization": BASIC_AUTH_HEADER
     }
 
     r = requests.post(url, json=payload, headers=headers)
